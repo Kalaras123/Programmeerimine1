@@ -49,7 +49,7 @@ namespace KooliProjekt.Controllers
         // GET: Operations/Create
         public IActionResult Create()
         {
-            ViewData["CarId"] = new SelectList(_context.Cars, "Id", "RegistrationNumber");
+            ViewData["CarId"] = new SelectList(_context.Cars, "Id", "Mark");
             ViewData["StatusId"] = new SelectList(_context.Statuses, "Id", "StatusType");
             ViewData["WorkerId"] = new SelectList(_context.Workers, "Id", "WorkerName");
             return View();
@@ -62,13 +62,16 @@ namespace KooliProjekt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Action,OperationDate,Cost,WorkerId,StatusId,CarId")] Operation operation)
         {
+            ModelState.Remove("Worker");
+            ModelState.Remove("Status");
+            ModelState.Remove("Car");
             if (ModelState.IsValid)
             {
                 _context.Add(operation);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CarId"] = new SelectList(_context.Cars, "Id", "RegistrationNumber", operation.CarId);
+            ViewData["CarId"] = new SelectList(_context.Cars, "Id", "Mark", operation.CarId);
             ViewData["StatusId"] = new SelectList(_context.Statuses, "Id", "StatusType", operation.StatusId);
             ViewData["WorkerId"] = new SelectList(_context.Workers, "Id", "WorkerName", operation.WorkerId);
             return View(operation);
@@ -87,7 +90,7 @@ namespace KooliProjekt.Controllers
             {
                 return NotFound();
             }
-            ViewData["CarId"] = new SelectList(_context.Cars, "Id", "RegistrationNumber", operation.CarId);
+            ViewData["CarId"] = new SelectList(_context.Cars, "Id", "Mark", operation.CarId);
             ViewData["StatusId"] = new SelectList(_context.Statuses, "Id", "StatusType", operation.StatusId);
             ViewData["WorkerId"] = new SelectList(_context.Workers, "Id", "WorkerName", operation.WorkerId);
             return View(operation);
@@ -105,6 +108,9 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
+            ModelState.Remove("Worker");
+            ModelState.Remove("Status");
+            ModelState.Remove("Car");
             if (ModelState.IsValid)
             {
                 try
@@ -125,7 +131,7 @@ namespace KooliProjekt.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CarId"] = new SelectList(_context.Cars, "Id", "RegistrationNumber", operation.CarId);
+            ViewData["CarId"] = new SelectList(_context.Cars, "Id", "Mark", operation.CarId);
             ViewData["StatusId"] = new SelectList(_context.Statuses, "Id", "StatusType", operation.StatusId);
             ViewData["WorkerId"] = new SelectList(_context.Workers, "Id", "WorkerName", operation.WorkerId);
             return View(operation);
