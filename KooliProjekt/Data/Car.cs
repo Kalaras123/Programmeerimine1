@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace KooliProjekt.Data
@@ -15,13 +16,14 @@ namespace KooliProjekt.Data
         [StringLength(50)]
         public string Model { get; set; }
 
+        [DisplayName("Registration Number")]
         [Required]
         [StringLength(20)]
         public string RegistrationNumber { get; set; }
 
         public IList<Operation> Operations { get; set; }
 
-        public Car() 
+        public Car()
         {
             Operations = new List<Operation>();
         }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace KooliProjekt.Data
 {
@@ -10,6 +11,7 @@ namespace KooliProjekt.Data
         [StringLength(100)]
         public string Action { get; set; }
 
+        [DisplayName("Operation Date")]
         [Required]
         public DateTime OperationDate { get; set; }
 
@@ -17,12 +19,15 @@ namespace KooliProjekt.Data
         public decimal Cost { get; set; }
 
         public Worker Worker { get; set; }
+        [DisplayName("Worker")]
         public int WorkerId { get; set; }
 
         public Status Status { get; set; }
+        [DisplayName("Status")]
         public int StatusId { get; set; }
 
         public Car Car { get; set; }
+        [DisplayName("Car")]
         public int CarId { get; set; }
     }
 }
