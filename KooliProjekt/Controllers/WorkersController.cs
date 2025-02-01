@@ -6,22 +6,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using KooliProjekt.Data;
+using KooliProjekt.Services;
 
 namespace KooliProjekt.Controllers
 {
     public class WorkersController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IWorkerService _workerService;
 
-        public WorkersController(ApplicationDbContext context)
+        public WorkersController(IWorkerService workerService)
         {
-            _context = context;
+            _workerService = workerService;
         }
 
         // GET: Workers
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Workers.ToListAsync());
+            var data = await _workerService.AllWorkers();
+            return View(data);
         }
 
         // GET: Workers/Details/5
@@ -32,8 +34,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var worker = await _context.Workers
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var worker = await _workerService.Get(id.Value);
             if (worker == null)
             {
                 return NotFound();
@@ -57,8 +58,7 @@ namespace KooliProjekt.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(worker);
-                await _context.SaveChangesAsync();
+                await _workerService.Save(worker);
                 return RedirectToAction(nameof(Index));
             }
             return View(worker);
@@ -72,7 +72,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var worker = await _context.Workers.FindAsync(id);
+            var worker = await _workerService.Get(id.Value);
             if (worker == null)
             {
                 return NotFound();
@@ -94,22 +94,7 @@ namespace KooliProjekt.Controllers
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(worker);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!WorkerExists(worker.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                await _workerService.Save(worker);
                 return RedirectToAction(nameof(Index));
             }
             return View(worker);
@@ -123,8 +108,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var worker = await _context.Workers
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var worker = _workerService.Get(id.Value);
             if (worker == null)
             {
                 return NotFound();
@@ -138,19 +122,8 @@ namespace KooliProjekt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var worker = await _context.Workers.FindAsync(id);
-            if (worker != null)
-            {
-                _context.Workers.Remove(worker);
-            }
-
-            await _context.SaveChangesAsync();
+            await _workerService.Delete(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool WorkerExists(int id)
-        {
-            return _context.Workers.Any(e => e.Id == id);
         }
     }
 }

@@ -6,22 +6,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using KooliProjekt.Data;
+using KooliProjekt.Services;
 
 namespace KooliProjekt.Controllers
 {
     public class StatusesController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IStatusService _statusService;
 
-        public StatusesController(ApplicationDbContext context)
+        public StatusesController(IStatusService statusService)
         {
-            _context = context;
+            _statusService = statusService;
         }
 
         // GET: Statuses
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Statuses.ToListAsync());
+            var data = await _statusService.AllStatuses(); 
+            return View(data);
         }
 
         // GET: Statuses/Details/5
@@ -32,8 +34,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var status = await _context.Statuses
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var status = await _statusService.Get(id.Value);
             if (status == null)
             {
                 return NotFound();
@@ -57,8 +58,7 @@ namespace KooliProjekt.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(status);
-                await _context.SaveChangesAsync();
+                await _statusService.Save(status);
                 return RedirectToAction(nameof(Index));
             }
             return View(status);
@@ -72,7 +72,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var status = await _context.Statuses.FindAsync(id);
+            var status = await _statusService.Get(id.Value);
             if (status == null)
             {
                 return NotFound();
@@ -94,22 +94,7 @@ namespace KooliProjekt.Controllers
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(status);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!StatusExists(status.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                await _statusService.Save(status);
                 return RedirectToAction(nameof(Index));
             }
             return View(status);
@@ -123,8 +108,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var status = await _context.Statuses
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var status = await _statusService.Get(id.Value);
             if (status == null)
             {
                 return NotFound();
@@ -138,19 +122,8 @@ namespace KooliProjekt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var status = await _context.Statuses.FindAsync(id);
-            if (status != null)
-            {
-                _context.Statuses.Remove(status);
-            }
-
-            await _context.SaveChangesAsync();
+            await _statusService.Delete(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool StatusExists(int id)
-        {
-            return _context.Statuses.Any(e => e.Id == id);
         }
     }
 }

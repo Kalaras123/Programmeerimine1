@@ -22,6 +22,8 @@ namespace KooliProjekt
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<ICarService, CarService>();
             builder.Services.AddScoped<IOperationService, OperationService>();
+            builder.Services.AddScoped<IStatusService, StatusService>();
+            builder.Services.AddScoped<IWorkerService, WorkerService>();
 
             var app = builder.Build();
 
