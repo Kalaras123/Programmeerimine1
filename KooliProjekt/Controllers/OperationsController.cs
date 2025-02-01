@@ -6,23 +6,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using KooliProjekt.Data;
+using KooliProjekt.Services;
 
 namespace KooliProjekt.Controllers
 {
     public class OperationsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IOperationService _operationService;
 
-        public OperationsController(ApplicationDbContext context)
+        public OperationsController(IOperationService operationService)
         {
-            _context = context;
+            _operationService = operationService;
         }
 
         // GET: Operations
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Operations.Include(o => o.Car).Include(o => o.Status).Include(o => o.Worker);
-            return View(await applicationDbContext.ToListAsync());
+            var data = await _operationService.AllOperations();
+            return View(data);
         }
 
         // GET: Operations/Details/5
@@ -33,11 +34,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var operation = await _context.Operations
-                .Include(o => o.Car)
-                .Include(o => o.Status)
-                .Include(o => o.Worker)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var operation = await _operationService.GetWithIncludes(id.Value);
             if (operation == null)
             {
                 return NotFound();
@@ -49,9 +46,6 @@ namespace KooliProjekt.Controllers
         // GET: Operations/Create
         public IActionResult Create()
         {
-            ViewData["CarId"] = new SelectList(_context.Cars, "Id", "Mark");
-            ViewData["StatusId"] = new SelectList(_context.Statuses, "Id", "StatusType");
-            ViewData["WorkerId"] = new SelectList(_context.Workers, "Id", "WorkerName");
             return View();
         }
 
@@ -67,13 +61,12 @@ namespace KooliProjekt.Controllers
             ModelState.Remove("Car");
             if (ModelState.IsValid)
             {
-                _context.Add(operation);
-                await _context.SaveChangesAsync();
+                await _operationService.Save(operation);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CarId"] = new SelectList(_context.Cars, "Id", "Mark", operation.CarId);
-            ViewData["StatusId"] = new SelectList(_context.Statuses, "Id", "StatusType", operation.StatusId);
-            ViewData["WorkerId"] = new SelectList(_context.Workers, "Id", "WorkerName", operation.WorkerId);
+            ViewData["CarId"] = new SelectList(await _operationService.GetCars(), "Id", "Mark", operation?.CarId);
+            ViewData["StatusId"] = new SelectList(await _operationService.GetStatuses(), "Id", "StatusType", operation?.StatusId);
+            ViewData["WorkerId"] = new SelectList(await _operationService.GetWorkers(), "Id", "WorkerName", operation?.WorkerId);
             return View(operation);
         }
 
@@ -85,14 +78,14 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var operation = await _context.Operations.FindAsync(id);
+            var operation = await _operationService.GetWithIncludes(id.Value);
             if (operation == null)
             {
                 return NotFound();
             }
-            ViewData["CarId"] = new SelectList(_context.Cars, "Id", "Mark", operation.CarId);
-            ViewData["StatusId"] = new SelectList(_context.Statuses, "Id", "StatusType", operation.StatusId);
-            ViewData["WorkerId"] = new SelectList(_context.Workers, "Id", "WorkerName", operation.WorkerId);
+            ViewData["CarId"] = new SelectList(await _operationService.GetCars(), "Id", "Mark", operation?.CarId);
+            ViewData["StatusId"] = new SelectList(await _operationService.GetStatuses(), "Id", "StatusType", operation?.StatusId);
+            ViewData["WorkerId"] = new SelectList(await _operationService.GetWorkers(), "Id", "WorkerName", operation?.WorkerId);
             return View(operation);
         }
 
@@ -113,27 +106,12 @@ namespace KooliProjekt.Controllers
             ModelState.Remove("Car");
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(operation);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!OperationExists(operation.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                await _operationService.Save(operation);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CarId"] = new SelectList(_context.Cars, "Id", "Mark", operation.CarId);
-            ViewData["StatusId"] = new SelectList(_context.Statuses, "Id", "StatusType", operation.StatusId);
-            ViewData["WorkerId"] = new SelectList(_context.Workers, "Id", "WorkerName", operation.WorkerId);
+            ViewData["CarId"] = new SelectList(await _operationService.GetCars(), "Id", "Mark", operation?.CarId);
+            ViewData["StatusId"] = new SelectList(await _operationService.GetStatuses(), "Id", "StatusType", operation?.StatusId);
+            ViewData["WorkerId"] = new SelectList(await _operationService.GetWorkers(), "Id", "WorkerName", operation?.WorkerId);
             return View(operation);
         }
 
@@ -145,11 +123,7 @@ namespace KooliProjekt.Controllers
                 return NotFound();
             }
 
-            var operation = await _context.Operations
-                .Include(o => o.Car)
-                .Include(o => o.Status)
-                .Include(o => o.Worker)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var operation = await _operationService.GetWithIncludes(id.Value);
             if (operation == null)
             {
                 return NotFound();
@@ -163,19 +137,8 @@ namespace KooliProjekt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var operation = await _context.Operations.FindAsync(id);
-            if (operation != null)
-            {
-                _context.Operations.Remove(operation);
-            }
-
-            await _context.SaveChangesAsync();
+            await _operationService.Delete(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool OperationExists(int id)
-        {
-            return _context.Operations.Any(e => e.Id == id);
         }
     }
 }

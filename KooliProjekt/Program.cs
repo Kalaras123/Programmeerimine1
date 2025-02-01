@@ -21,6 +21,7 @@ namespace KooliProjekt
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<ICarService, CarService>();
+            builder.Services.AddScoped<IOperationService, OperationService>();
 
             var app = builder.Build();
 

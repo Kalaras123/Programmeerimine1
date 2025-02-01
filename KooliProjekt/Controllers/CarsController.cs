@@ -14,8 +14,7 @@ namespace KooliProjekt.Controllers
     {
         private readonly ICarService _carService;
 
-        public CarsController(ApplicationDbContext context,
-            ICarService carService)
+        public CarsController(ICarService carService)
         {
             _carService = carService;
         }
