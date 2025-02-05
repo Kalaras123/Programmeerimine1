@@ -1,10 +1,11 @@
 ﻿using KooliProjekt.Data;
+using KooliProjekt.Search;
 
 namespace KooliProjekt.Services
 {
     public interface IOperationService
     {
-        Task<List<Operation>> AllOperations();
+        Task<List<Operation>> AllOperations(OperationsSearch search = null);
         Task<List<Car>> GetCars();
         Task<List<Status>> GetStatuses();
         Task<List<Worker>> GetWorkers();

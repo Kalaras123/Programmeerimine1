@@ -1,4 +1,5 @@
 ﻿using KooliProjekt.Data;
+using KooliProjekt.Search;
 using Microsoft.EntityFrameworkCore;
 
 namespace KooliProjekt.Services
@@ -12,9 +13,31 @@ namespace KooliProjekt.Services
             _context = context;
         }
 
-        public async Task<List<Operation>> AllOperations()
+        public async Task<List<Operation>> AllOperations(OperationsSearch search = null)
         {
-            return await _context.Operations
+            var query = _context.Operations
+                .AsQueryable();
+
+            if (search != null) 
+            {
+                if(!string.IsNullOrWhiteSpace(search.Keyword))
+                {
+                    search.Keyword = search.Keyword.Trim();
+                    query = query.Where(o => 
+                    o.Action.Contains(search.Keyword) ||
+                    o.Worker.WorkerName.Contains(search.Keyword)
+                    );
+                }
+
+                if (!string.IsNullOrEmpty(search.IsStatus))
+                {
+                    query = query.Where(o =>
+                    o.Status.StatusType.Equals(search.IsStatus)
+                    );
+                }
+            }
+
+            return await query
                 .Include(o => o.Car)
                 .Include(o => o.Status)
                 .Include(o => o.Worker)

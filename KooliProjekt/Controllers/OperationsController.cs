@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using KooliProjekt.Data;
+using KooliProjekt.Models;
 using KooliProjekt.Services;
+using KooliProjekt.Search;
 
 namespace KooliProjekt.Controllers
 {
@@ -20,10 +22,11 @@ namespace KooliProjekt.Controllers
         }
 
         // GET: Operations
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(OperationsIndexModel model = null)
         {
-            var data = await _operationService.AllOperations();
-            return View(data);
+            model = model ?? new OperationsIndexModel();
+            model.Data = await _operationService.AllOperations(model.Search);
+            return View(model);
         }
 
         // GET: Operations/Details/5

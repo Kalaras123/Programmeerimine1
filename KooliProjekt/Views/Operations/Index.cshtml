@@ -1,4 +1,4 @@
-﻿@model IEnumerable<KooliProjekt.Data.Operation>
+﻿@model OperationsIndexModel
 
 @{
     ViewData["Title"] = "Index";
@@ -9,32 +9,55 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+<form method="get">
+    <div class="form-group">
+        <label class="control-label">Search keyword (includes Action and Worker fields)</label>
+        <input asp-for="Search.Keyword" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label class="control-label">Filter by status</label>
+        <select asp-for="Search.IsStatus" class="form-control">
+            <option value="">-</option>
+            <option value="Uus">Uus</option>
+            <option value="Tegemisel">Tegemisel</option>
+            <option value="Ootel">Ootel</option>
+            <option value="Valmis">Valmis</option>
+            <option value="Uuesti tegemisele">Uuesti tegemisele</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary">Search</button>
+        <a asp-controller="Operations" asp-action="Index" class="btn btn-primary">Reset</a>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Action)
+                @Html.DisplayNameFor(model => model.Data.FirstOrDefault().Action)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.OperationDate)
+                @Html.DisplayNameFor(model => model.Data.FirstOrDefault().OperationDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Cost)
+                @Html.DisplayNameFor(model => model.Data.FirstOrDefault().Cost)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Worker)
+                @Html.DisplayNameFor(model => model.Data.FirstOrDefault().Worker)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Status)
+                @Html.DisplayNameFor(model => model.Data.FirstOrDefault().Status)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Car)
+                @Html.DisplayNameFor(model => model.Data.FirstOrDefault().Car)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.Data) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Action)
